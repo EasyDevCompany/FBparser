@@ -1,0 +1,7 @@
+sqlalchemy==1.4.36
+psycopg2-binary==2.9.3
+requests==2.23.0
+pydantic[dotenv]==1.9.1
+aiogram==2.23.1
+aioredis==2.0.1
+celery==5.2.7
