@@ -32,3 +32,40 @@ services:
       ports:
         - "5672:5672"
         - "15672:15672"
+  
+  bot:
+    build:
+      context: ./src/
+      dockerfile: Bot.Dockerfile
+    restart: always
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - ./.env
+  
+  beat:
+    build:
+      context: ./src/
+      dockerfile: Beat.Dockerfile
+    restart: always
+    depends_on:
+      - db
+      - redis
+      - rabbit
+      - bot
+    env_file:
+      - ./.env
+  
+  worker:
+    build:
+      context: ./src/
+      dockerfile: Worker.Dockerfile
+    restart: always
+    depends_on:
+      - db
+      - redis
+      - rabbit
+      - bot
+    env_file:
+      - ./.env

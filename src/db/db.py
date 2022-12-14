@@ -11,7 +11,7 @@ Base = declarative_base()
 Base.query = db_session.query_property()
 
 
-def init_db():
+def init_db() -> None:
     from . import db_models
 
     Base.metadata.create_all(bind=engine, checkfirst=True)
