@@ -1,4 +1,5 @@
 import asyncio
+import csv
 import os
 from abc import ABC
 from datetime import datetime as dt
@@ -8,14 +9,13 @@ from time import sleep
 from typing import Dict, List
 
 import requests
-import yaml
 
 from core.config import app_logger, bot
 from db.db import db_session
 from db.db_models import MarketItem
 
 
-class FbParser(ABC):
+class TaskExecutor(ABC):
     def __init__(self, geo: str, query: str, chat_id: int) -> None:
         self.geo = geo
         self.query = query
@@ -25,7 +25,7 @@ class FbParser(ABC):
 
     def start_parsing(self) -> None:
         """Функция парсинга (пока фейковая)"""
-
+        # Менять от этой строчки
         fake_list = []
         num = randint(5, 10)
 
@@ -34,20 +34,19 @@ class FbParser(ABC):
             fake_dict = {
                 "item_link": f"https://market.yandex.ru/product--ramka-2p-jung-epd482-slonovaia-kost/1780078{number}",
                 "header": f"Заголовок_{number}",
-                # 'image': f'Заголовок_{number}',
-                "price": number,
-                "property_type": choice(["Квартира", "Подвал", "Отель", "Дом", "Гараж"]),
-                "info": f"Спален {number}, туалетов {number}",
-                "area": f"{number} м2",
-                "coordinates": f"{number/100}, {number/100}",
+                "image": f"https://facebookmarket/item_{number},https://facebookmarket/item_{number}",
+                "price": choice([None, number]),
+                "info": f"{choice(['Квартира', 'Отель', 'Гараж'])}, Спален {number} туалетов {number}, {number}м2",
+                "coordinates": f"{number*12345/100}, {number*12345/100}",
                 "description": f"Описание_{number}",
                 "owner_link": f"https://facebook/user_{number}",
             }
             fake_list.append(fake_dict)
+            # До этой строчки
 
         app_logger.info("Market was parsed")
 
-        self.storage = fake_list
+        self.storage = fake_list  # И поменять тут
 
         self.create_db_objects()
         return None
@@ -61,15 +60,14 @@ class FbParser(ABC):
         for object in parsed_objects:
 
             item = MarketItem(
-                item_link=object["item_link"],
-                header=object["header"],
-                price=object["price"],
-                property_type=object["property_type"],
-                info=object["info"],
-                area=object["area"],
-                coordinates=object["coordinates"],
-                description=object["description"],
-                owner_link=object["owner_link"],
+                item_link=object.get("item_link"),
+                header=object.get("header"),
+                image=object.get("image"),
+                price=object.get("price"),
+                info=object.get("info"),
+                coordinates=object.get("coordinates"),
+                description=object.get("description"),
+                owner_link=object.get("owner_link"),
             )
 
             exists = bool(MarketItem.query.filter_by(item_link=item.item_link).first())
@@ -91,7 +89,7 @@ class FbParser(ABC):
         formatted_list_of_db_objects = self.prepare_list_of_objects(market_items)
 
         if formatted_list_of_db_objects:
-            file_name = f"parsed_{self.date_today}.yml"
+            file_name = f"parsed_{self.date_today}.csv"
 
             self.create_file(file_name, formatted_list_of_db_objects)
 
@@ -108,14 +106,12 @@ class FbParser(ABC):
         result_list = []
 
         for item in market_items:
-            temp_dict = {}
-            temp_dict[item.header] = {
+            temp_dict = {
                 "item_link": item.item_link,
                 "header": item.header,
+                "image": item.image,
                 "price": item.price,
-                "property_type": item.property_type,
                 "info": item.info,
-                "area": item.area,
                 "coordinates": item.coordinates,
                 "description": item.description,
                 "owner_link": item.owner_link,
@@ -126,14 +122,11 @@ class FbParser(ABC):
 
     def create_file(self, file_name, list_to_write) -> None:
         """Создание результирующего yaml файла"""
-        with open(file_name, "w", encoding="utf-8") as outfile:
-            yaml.dump(
-                {self.date_today: list_to_write},
-                outfile,
-                default_flow_style=False,
-                allow_unicode=True,
-                encoding="utf-8",
-            )
+        with open(file_name, "w", encoding="utf-8", newline="") as outfile:
+            keys = list_to_write[0].keys()
+            dict_writer = csv.DictWriter(outfile, keys, delimiter=";")
+            dict_writer.writeheader()
+            dict_writer.writerows(list_to_write)
         return None
 
     def delete_non_existent_items(self):
@@ -158,7 +151,7 @@ class FbParser(ABC):
         if items_to_delete:
             formatted_list_of_db_objects = self.prepare_list_of_objects(items_to_delete)
 
-            file_name = "deleted_items.yml"
+            file_name = "deleted_items.csv"
             self.create_file(file_name, formatted_list_of_db_objects)
 
             app_logger.info("Deleted data was successfully written to file")

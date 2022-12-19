@@ -1,9 +1,9 @@
 import json
+from pathlib import Path
 
 from celery_conf import celery
 from core.config import app_logger
-from svc.parser import FbParser
-from pathlib import Path
+from svc.parser import TaskExecutor
 
 
 @celery.task()
@@ -21,7 +21,7 @@ def start_parsing() -> str:
         if data:
             json_data = json.loads(data)
 
-            fb_parser = FbParser(json_data["Геопозиция"], json_data["Запрос"], json_data["chat_id"])
+            fb_parser = TaskExecutor(json_data["Геопозиция"], json_data["Запрос"], json_data["chat_id"])
             fb_parser.start_parsing()
 
             app_logger.info("Finish parsing")
@@ -51,7 +51,7 @@ def delete_links() -> str:
         if data:
             json_data = json.loads(data)
 
-            fb_parser = FbParser(json_data["Геопозиция"], json_data["Запрос"], json_data["chat_id"])
+            fb_parser = TaskExecutor(json_data["Геопозиция"], json_data["Запрос"], json_data["chat_id"])
             fb_parser.delete_non_existent_items()
 
             app_logger.info("Finish deleting")

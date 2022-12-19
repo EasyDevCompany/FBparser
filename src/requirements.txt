@@ -6,4 +6,3 @@ aiogram==2.23.1
 aioredis==2.0.1
 celery==5.2.7
 aiofiles==22.1.0
-PyYAML==6.0

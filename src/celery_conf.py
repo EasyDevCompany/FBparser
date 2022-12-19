@@ -9,7 +9,7 @@ celery = Celery(
         f"amqp://{config.RABBITMQ_DEFAULT_USER}:{config.RABBITMQ_DEFAULT_PASS}@"
         f"{config.RABBITMQ_DEFAULT_HOST}:{config.RABBITMQ_DEFAULT_PORT}"
     ),
-    include=["svc.scheduler.tasks"]
+    include=["svc.scheduler.tasks"],
 )
 
 celery.conf.beat_schedule = {
