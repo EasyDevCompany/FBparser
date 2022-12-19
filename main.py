@@ -1,20 +1,30 @@
-import requests
-from bs4 import BeautifulSoup
+import os
+import time
+from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import NoSuchElementException
-import time
+
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:94.0) Gecko/20100101 Firefox/94.0'
 }
 
 
-url = 'https://www.facebook.com/marketplace/112306758786227/search/?query=rent%20apartment&exact=false'
 
-def get_location_number():
-    pass
+
+
+def search_location_setup(driver, location):
+    while len(driver.find_elements(By.XPATH, '//div[@class="x1iyjqo2"]//ancestor::div[@role="button"]'))==0:
+        pass
+    driver.find_element(By.XPATH, '//div[@class="x1iyjqo2"]//ancestor::div[@role="button"]').click()
+    while len(driver.find_elements(By.XPATH, '//input[@aria-label="Укажите город"]'))==0:
+        pass
+    driver.find_element(By.XPATH, '//input[@aria-label="Укажите город"]').send_keys(location)
+    while len(driver.find_elements(By.XPATH, '//li[@class="xh8yej3" and @role="option"]'))==0:
+        pass
+    driver.find_elements(By.XPATH, '//div[@class="x1lq5wgf xgqcy7u x30kzoy x9jhf4c x1lliihq"]')[0].click()
+    driver.find_element(By.XPATH, '//div[@aria-label="Применить"]').click()
+
 
 
 def scroll_to_the_end_of_page(driver):
@@ -28,9 +38,9 @@ def scroll_to_the_end_of_page(driver):
         time.sleep(1)
 
 
-def login(driver):
-    username = 'framerium642@gmail.com'
-    password = 'dany25042004'
+def login(driver, url):
+    username = os.environ.get('USERNAME')
+    password = os.environ.get('PASSWORD')
 
     driver.get(url)
     driver.find_element(By.XPATH, '//*[@id="email"]').send_keys(username)
@@ -59,19 +69,23 @@ def get_goods_data(links, driver):
     data = []
     for link in links:
         driver.get(link)
-        content_container = driver.find_element(
-            By.XPATH, '//div[@class="xjdnv2c x78zum5 x5yr21d x1n2onr6 xh8yej3 xzepove x1stjdt1 xnp8db0"]')
-        name = content_container.find_element(
-            By.TAG_NAME, 'h1').find_element(By.TAG_NAME, 'span').text
+        while len(driver.find_elements(By.XPATH, '//div[@class="xyamay9 x1pi30zi x18d9i69 x1swvt13"]'))==0:
+            pass
+        name_price_container = driver.find_element(By.XPATH, '//div[@class="xyamay9 x1pi30zi x18d9i69 x1swvt13"]')
+        name = name_price_container.find_element(By.XPATH, '//h1/span').text
         images_links = get_all_goods_images_links(driver)
-        price = content_container.find_element(By.XPATH, '//div[@class="x1anpbxc"]/span').text
+        price = name_price_container.find_element(By.XPATH, '//div[@class="x1xmf6yo"]').find_element(By.XPATH, '//div/span').text
         real_estate_info = get_real_estate_info(driver)
         location = get_good_location(driver)
         # Getting full description
         if len(driver.find_elements(By.XPATH, '//span[text()="Ещё"]')) > 0: 
             driver.find_element(By.XPATH, '//span[text()="Ещё"]').click()
-        description = driver.find_element(
-            By.XPATH, '//div[@class="x14vqqas"]/preceding-sibling::span').text
+        if len(driver.find_elements(
+            By.XPATH, '//div[@class="x14vqqas"]/preceding-sibling::span')) != 0:
+            description = driver.find_element(
+                By.XPATH, '//div[@class="x14vqqas"]/preceding-sibling::span').text
+        else:
+            description = ''
         saler_link = get_saler_link(driver)
         data.append({
             'name': name,
@@ -82,7 +96,6 @@ def get_goods_data(links, driver):
             'description': description,
             'saler_link': saler_link
         })
-
     return data
 
 
@@ -135,13 +148,16 @@ def get_saler_link(driver):
             return link[0].get_attribute('href')
 
 
-def main():
+def main(query, location):
     driver = webdriver.Firefox()
-    login(driver)
+    load_dotenv()
+    url = f'https://www.facebook.com/marketplace/112306758786227/search/?query={query}&exact=false'
+    login(driver, url)
+    search_location_setup(driver, location)
     scroll_to_the_end_of_page(driver)
     links = get_goods_links_from_page(driver)
     result = get_goods_data(links, driver)
     print(result)
 
 if __name__ == '__main__':
-    main()
+    main(query='rent%20apartment', location='Лондон')
