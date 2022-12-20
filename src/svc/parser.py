@@ -13,6 +13,7 @@ import requests
 from core.config import app_logger, bot
 from db.db import db_session
 from db.db_models import MarketItem
+from . import parser_engine
 
 
 class TaskExecutor(ABC):
@@ -25,31 +26,7 @@ class TaskExecutor(ABC):
 
     def start_parsing(self) -> None:
         """Функция парсинга (пока фейковая)"""
-        # Менять от этой строчки
-        fake_list = []
-        num = randint(5, 10)
-
-        for _ in range(num):
-            number = randint(0, 10)
-            fake_dict = {
-                "item_link": f"https://market.yandex.ru/product--ramka-2p-jung-epd482-slonovaia-kost/1780078{number}",
-                "header": f"Заголовок_{number}",
-                "image": f"https://facebookmarket/item_{number},https://facebookmarket/item_{number}",
-                "price": choice([None, number]),
-                "info": f"{choice(['Квартира', 'Отель', 'Гараж'])}, Спален {number} туалетов {number}, {number}м2",
-                "coordinates": f"{number*12345/100}, {number*12345/100}",
-                "description": f"Описание_{number}",
-                "owner_link": f"https://facebook/user_{number}",
-            }
-            fake_list.append(fake_dict)
-            # До этой строчки
-
-        app_logger.info("Market was parsed")
-
-        self.storage = fake_list  # И поменять тут
-
-        self.create_db_objects()
-        return None
+        self.storage = parser_engine.main(query=self.query, location=self.geo)
 
     def create_db_objects(self) -> None:
         """Создание объектов класса Marketitem из данных парсинга"""

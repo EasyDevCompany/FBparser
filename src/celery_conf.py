@@ -15,7 +15,7 @@ celery = Celery(
 celery.conf.beat_schedule = {
     "start_parsing": {
         "task": "svc.scheduler.tasks.start_parsing",
-        "schedule": crontab(hour="9"),
+        "schedule": 60, #crontab(hour="11", minutes="49"),
     },
     "delete_non_existing_items_links": {
         "task": "svc.scheduler.tasks.delete_links",
