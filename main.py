@@ -88,6 +88,7 @@ def get_goods_data(links, driver):
             description = ''
         saler_link = get_saler_link(driver)
         data.append({
+            'good_link': link,
             'name': name,
             'images': images_links,
             'price': price,
@@ -149,7 +150,11 @@ def get_saler_link(driver):
 
 
 def main(query, location):
-    driver = webdriver.Firefox()
+    options = webdriver.FirefoxOptions()
+    options.set_preference('general.useragent.override','Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:94.0) Gecko/20100101 Firefox/94.0')
+    options.set_preference('dom.webdriver.enabled', False)
+    options.headless = True
+    driver = webdriver.Firefox(options=options)
     load_dotenv()
     url = f'https://www.facebook.com/marketplace/112306758786227/search/?query={query}&exact=false'
     login(driver, url)
