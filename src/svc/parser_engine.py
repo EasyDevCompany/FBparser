@@ -13,7 +13,9 @@ headers = {
 
 def wait_for_loading_element(xpath, driver, func, *func_args):
     now = datetime.now()
-    while len(driver.find_elements(By.XPATH, xpath)) == 0:
+    while True:
+        if len(driver.find_elements(By.XPATH, xpath)) > 0:
+            break
         if (datetime.now() - now) > timedelta(seconds=20):
             print(datetime.now(), now, 'refresh')
             now = datetime.now()
@@ -51,6 +53,8 @@ def login(driver, url):
     password = os.environ.get('PASSWORD')
 
     driver.get(url)
+    if len(driver.find_elements(By.XPATH, '//button[text()="Allow essential and optional cookies"]')) > 0:
+        driver.find_element(By.XPATH, '//button[text()="Allow essential and optional cookies"]').click()
     driver.find_element(By.XPATH, '//*[@id="email"]').send_keys(username)
     driver.find_element(By.XPATH, '//*[@id="pass"]').send_keys(password)
     driver.find_element(By.XPATH, '//*[@id="loginbutton"]').click()
@@ -104,7 +108,6 @@ def get_goods_data(links, driver):
             'description': description,
             'owner_link': saler_link
         })
-        break
     return data
 
 
@@ -167,7 +170,7 @@ def main(query, location):
     print('start login')
     login(driver, url)
     print('logined successfully')
-    search_location_setup(driver, location)
+    # search_location_setup(driver, location)
     print('set_locate')
     scroll_to_the_end_of_page(driver)
     links = get_goods_links_from_page(driver)
