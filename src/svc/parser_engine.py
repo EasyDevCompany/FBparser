@@ -1,5 +1,6 @@
 import os
 import time
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -10,18 +11,25 @@ headers = {
 }
 
 
-
-
+def wait_for_loading_element(xpath, driver, func, *func_args):
+    now = datetime.now()
+    while len(driver.find_elements(By.XPATH, xpath)) == 0:
+        if (datetime.now() - now) > timedelta(seconds=20):
+            print(datetime.now(), now, 'refresh')
+            now = datetime.now()
+            # driver.refresh()
+            # func(*func_args)
+            break
 
 def search_location_setup(driver, location):
-    while len(driver.find_elements(By.XPATH, '//div[@class="x1iyjqo2"]//ancestor::div[@role="button"]'))==0:
-        pass
+    wait_for_loading_element('//div[@class="x1iyjqo2"]//ancestor::div[@role="button"]', driver, search_location_setup, driver, location)
+    print('here1')
     driver.find_element(By.XPATH, '//div[@class="x1iyjqo2"]//ancestor::div[@role="button"]').click()
-    while len(driver.find_elements(By.XPATH, '//input[@aria-label="Укажите город"]'))==0:
-        pass
+    wait_for_loading_element('//input[@aria-label="Укажите город"]', driver, search_location_setup, driver, location)
+    print('here2')
     driver.find_element(By.XPATH, '//input[@aria-label="Укажите город"]').send_keys(location)
-    while len(driver.find_elements(By.XPATH, '//li[@class="xh8yej3" and @role="option"]'))==0:
-        pass
+    wait_for_loading_element('//li[@class="xh8yej3" and @role="option"]', driver, search_location_setup, driver, location)
+    print('here3')
     driver.find_elements(By.XPATH, '//div[@class="x1lq5wgf xgqcy7u x30kzoy x9jhf4c x1lliihq"]')[0].click()
     driver.find_element(By.XPATH, '//div[@aria-label="Применить"]').click()
 
@@ -69,8 +77,7 @@ def get_goods_data(links, driver):
     data = []
     for link in links:
         driver.get(link)
-        while len(driver.find_elements(By.XPATH, '//div[@class="xyamay9 x1pi30zi x18d9i69 x1swvt13"]'))==0:
-            pass
+        wait_for_loading_element('//div[@class="xyamay9 x1pi30zi x18d9i69 x1swvt13"]', driver, get_goods_data, links, driver)
         name_price_container = driver.find_element(By.XPATH, '//div[@class="xyamay9 x1pi30zi x18d9i69 x1swvt13"]')
         name = name_price_container.find_element(By.XPATH, '//h1/span').text
         images_links = get_all_goods_images_links(driver)
@@ -105,9 +112,8 @@ def get_all_goods_images_links(driver):
     images_links = []
     images_container = driver.find_elements(
         By.XPATH, '//div[@class="x1a0syf3 x1ja2u2z"]/div')
-    if len(images_container)==0:
-        while len(driver.find_elements(By.XPATH, '//span[@class="x78zum5 x1vjfegm"]/descendant::img'))==0:
-            pass
+    if len(images_container) == 0:
+        wait_for_loading_element('//span[@class="x78zum5 x1vjfegm"]/descendant::img', driver, get_all_goods_images_links, driver)
         return [driver.find_element(By.XPATH, '//span[@class="x78zum5 x1vjfegm"]/descendant::img').get_attribute('src')]
     for image_container in images_container[0].find_elements(By.XPATH, '*'):
         images_links.append(image_container.find_element(By.TAG_NAME, 'img').get_attribute('src'))
@@ -158,8 +164,11 @@ def main(query, location):
     driver = webdriver.Firefox(options=options)
     load_dotenv()
     url = f'https://www.facebook.com/marketplace/112306758786227/search/?query={query}&exact=false'
+    print('start login')
     login(driver, url)
+    print('logined successfully')
     search_location_setup(driver, location)
+    print('set_locate')
     scroll_to_the_end_of_page(driver)
     links = get_goods_links_from_page(driver)
     result = get_goods_data(links, driver)
