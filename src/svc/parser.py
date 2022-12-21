@@ -13,7 +13,7 @@ import requests
 from core.config import app_logger, bot
 from db.db import db_session
 from db.db_models import MarketItem
-from . import parser_engine
+from svc import parser_engine
 
 
 class TaskExecutor(ABC):
@@ -26,7 +26,11 @@ class TaskExecutor(ABC):
 
     def start_parsing(self) -> None:
         """Функция парсинга (пока фейковая)"""
-        self.storage = parser_engine.main(query=self.query, location=self.geo)
+        print(self.geo, self.query)
+        self.storage = parser_engine.main(query=self.geo, location=self.query)
+        app_logger.info("Market was parsed")
+        self.create_db_objects()
+        return None
 
     def create_db_objects(self) -> None:
         """Создание объектов класса Marketitem из данных парсинга"""
@@ -39,7 +43,7 @@ class TaskExecutor(ABC):
             item = MarketItem(
                 item_link=object.get("item_link"),
                 header=object.get("header"),
-                image=object.get("image"),
+                image=object.get("images"),
                 price=object.get("price"),
                 info=object.get("info"),
                 coordinates=object.get("coordinates"),

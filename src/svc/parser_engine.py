@@ -3,7 +3,6 @@ import time
 from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.firefox.service import Service
 
 
 headers = {
@@ -89,14 +88,14 @@ def get_goods_data(links, driver):
             description = ''
         saler_link = get_saler_link(driver)
         data.append({
-            'good_link': link,
-            'name': name,
-            'images': images_links,
+            'item_link': link,
+            'header': name,
+            'images': ','.join(images_links),
             'price': price,
-            'real_estate_info': real_estate_info,
-            'location': location,
+            'info': real_estate_info,
+            'coordinates': location,
             'description': description,
-            'saler_link': saler_link
+            'owner_link': saler_link
         })
         break
     return data
@@ -152,20 +151,19 @@ def get_saler_link(driver):
 
 
 def main(query, location):
-    s = Service(executable_path='./geckodriver')
     options = webdriver.FirefoxOptions()
     options.set_preference('general.useragent.override','Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:94.0) Gecko/20100101 Firefox/94.0')
     options.set_preference('dom.webdriver.enabled', False)
     options.headless = True
-    driver = webdriver.Firefox(service=s, options=options)
+    driver = webdriver.Firefox(options=options)
     load_dotenv()
     url = f'https://www.facebook.com/marketplace/112306758786227/search/?query={query}&exact=false'
     login(driver, url)
     search_location_setup(driver, location)
     scroll_to_the_end_of_page(driver)
     links = get_goods_links_from_page(driver)
-    print('got link')
     result = get_goods_data(links, driver)
+    print(result)
     return result
 
 if __name__ == '__main__':
