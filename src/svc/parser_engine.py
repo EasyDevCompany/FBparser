@@ -85,7 +85,7 @@ def get_goods_data(links, driver):
         name_price_container = driver.find_element(By.XPATH, '//div[@class="xyamay9 x1pi30zi x18d9i69 x1swvt13"]')
         name = name_price_container.find_element(By.XPATH, '//h1/span').text
         images_links = get_all_goods_images_links(driver)
-        price = name_price_container.find_element(By.XPATH, '//div[@class="x1xmf6yo"]').find_element(By.XPATH, '//div/span').text
+        price = name_price_container.find_element(By.XPATH, '//span[@class="x193iq5w xeuugli x13faqbe x1vvkbs x10flsy6 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1tu3fi x3x7a5m x1lkfr7t x1lbecb7 x1s688f xzsf02u"]').text
         real_estate_info = get_real_estate_info(driver)
         location = get_good_location(driver)
         # Getting full description
