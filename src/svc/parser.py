@@ -26,7 +26,7 @@ class TaskExecutor(ABC):
 
     def start_parsing(self) -> None:
         """Функция парсинга (пока фейковая)"""
-        print(self.geo, self.query)
+        app_logger.info(f"{self.geo} --- {self.query}")
         self.storage = parser_engine.main(query=self.geo, location=self.query)
         app_logger.info("Market was parsed")
         self.create_db_objects()

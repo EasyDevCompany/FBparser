@@ -6,6 +6,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
 from svc.states.states import StartState
+from core.config import app_logger
 
 
 async def start(message: types.Message, state: FSMContext) -> None:
@@ -43,6 +44,8 @@ async def query_input_start(message: types.Message, state: FSMContext) -> None:
 
     async with aiofiles.open(f"{path_to_file}/geo_query.json", "w", encoding="utf-8") as json_file:
         await json_file.write(json.dumps(reply_dict, ensure_ascii=False, indent=2))
+    
+    app_logger.info(f"Income data: {reply_dict}")
 
 
 def register_handlers_start(dp: Dispatcher) -> None:

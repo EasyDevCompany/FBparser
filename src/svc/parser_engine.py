@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
+from core.config import config, app_logger
+
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:94.0) Gecko/20100101 Firefox/94.0'
@@ -49,8 +51,8 @@ def scroll_to_the_end_of_page(driver):
 
 
 def login(driver, url):
-    username = os.environ.get('USERNAME')
-    password = os.environ.get('PASSWORD')
+    username = config.USERNAME
+    password = config.PASSWORD
 
     driver.get(url)
     if len(driver.find_elements(By.XPATH, '//button[text()="Allow essential and optional cookies"]')) > 0:
@@ -167,15 +169,17 @@ def main(query, location):
     driver = webdriver.Firefox(options=options)
     load_dotenv()
     url = f'https://www.facebook.com/marketplace/112306758786227/search/?query={query}&exact=false'
-    print('start login')
+    app_logger.info("Start login")
     login(driver, url)
-    print('logined successfully')
+    app_logger.info("Logined successfully")
     # search_location_setup(driver, location)
-    print('set_locate')
+    app_logger.info("Start scrolling")
     scroll_to_the_end_of_page(driver)
+    app_logger.info("Finish scrolling")
+    app_logger.info("Start getting links")
     links = get_goods_links_from_page(driver)
+    app_logger.info("Got links")
+    app_logger.info("Start getting data from links")
     result = get_goods_data(links, driver)
+    app_logger.info("Got data from links")
     return result
-
-if __name__ == '__main__':
-    main(query='rent%20apartment', location='Лондон')

@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - ./.env
+      - ./src/.env
     expose:
       - 5432
     healthcheck:
@@ -35,7 +35,7 @@ services:
       restart: always
       image: "rabbitmq:3-management"
       env_file:
-        - ./.env
+        - ./src/.env
       ports:
         - "5672:5672"
         - "15672:15672"
@@ -58,7 +58,7 @@ services:
       redis:
         condition: service_healthy
     env_file:
-      - ./.env
+      - ./src/.env
 
   beat:
     build:
@@ -73,7 +73,7 @@ services:
       rabbit:
         condition: service_healthy
     env_file:
-      - ./.env
+      - ./src/.env
 
   worker:
     build:
@@ -88,4 +88,4 @@ services:
       rabbit:
         condition: service_healthy
     env_file:
-      - ./.env
+      - ./src/.env

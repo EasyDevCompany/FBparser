@@ -6,6 +6,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
 from svc.states.states import ParseState
+from core.config import app_logger
 
 
 async def change_query_start(message: types.Message, state: FSMContext) -> None:
@@ -33,6 +34,8 @@ async def query_input(message: types.Message, state: FSMContext) -> None:
 
         async with aiofiles.open(f"{path_to_file}/geo_query.json", "w", encoding="utf-8") as json_file:
             await json_file.write(json.dumps(json_data, ensure_ascii=False, indent=2))
+        
+        app_logger.info(f"Income data: {json_data}")
 
         json_data.pop("chat_id")
         await message.answer(
