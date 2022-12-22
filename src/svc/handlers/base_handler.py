@@ -13,26 +13,24 @@ async def start(message: types.Message, state: FSMContext) -> None:
         "Для начала работы с ботом необходимо указать Геопозицию и Запрос.\n"
         "\n"
         "Парсинг будет запускаться каждый день в 9:00 по вашему времени.\n"
+        "\n"
+        "После 9:00 придет либо файл, либо сообщение, что новых записей нет\n"
+        "\n"
         "Удаление несуществующих ссылок будет запускаться каждый день в 21:00 по вашему времени.\n"
+        "\n"
+        "Если ничего не удалилось, то никаких сообщений после 21:00 не будет.\n"
         "\n"
         "Вы можете поменять поисковый запрос в любое время, но лучше не меняйте его за 5 минут до начала парсинга."
     )
-    await message.answer("Укажите геопозицию:")
-    await state.set_state(StartState.waiting_for_geo.state)
-
-
-async def geo_input_start(message: types.Message, state: FSMContext):
-    await state.update_data(chosen_geo=message.text.lower())
-
-    await state.set_state(StartState.waiting_for_query.state)
     await message.answer("Укажите запрос:")
+    await state.set_state(StartState.waiting_for_query.state)
 
 
 async def query_input_start(message: types.Message, state: FSMContext) -> None:
     await state.update_data(chosen_query=message.text.lower())
 
     user_data = await state.get_data()
-    reply_dict = {"Геопозиция": user_data["chosen_geo"], "Запрос": user_data["chosen_query"]}
+    reply_dict = {"Геопозиция": 'паттайа', "Запрос": user_data["chosen_query"]}
     await message.answer(
         reply_dict,
         reply_markup=types.ReplyKeyboardRemove(),
@@ -49,5 +47,4 @@ async def query_input_start(message: types.Message, state: FSMContext) -> None:
 
 def register_handlers_start(dp: Dispatcher) -> None:
     dp.register_message_handler(start, commands="start", state="*")
-    dp.register_message_handler(geo_input_start, state=StartState.waiting_for_geo)
     dp.register_message_handler(query_input_start, state=StartState.waiting_for_query)

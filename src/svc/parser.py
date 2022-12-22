@@ -19,7 +19,7 @@ from svc import parser_engine
 class TaskExecutor(ABC):
     def __init__(self, geo: str, query: str, chat_id: int) -> None:
         self.geo = geo
-        self.query = query
+        self.query = query.replace(" ", "%20")
         self.chat_id = chat_id
         self.storage: List[Dict] = []
         self.date_today = dt.now().date()
