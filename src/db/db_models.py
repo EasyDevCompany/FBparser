@@ -14,7 +14,7 @@ class MarketItem(Base):
     item_link = Column(String, unique=True, nullable=False)  # ссылка на объект
     header = Column(String, nullable=False)  # заголовок
     image = Column(String, nullable=True)  # изображения
-    price = Column(Integer, nullable=True)  # цена
+    price = Column(String, nullable=True)  # цена
     info = Column(String, nullable=True)  # информация о недвижимости
     coordinates = Column(String, nullable=True)  # координаты
     description = Column(String, nullable=True)  # описание

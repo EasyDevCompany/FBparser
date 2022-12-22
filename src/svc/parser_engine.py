@@ -103,7 +103,7 @@ def get_goods_data(links, driver):
             'header': name,
             'images': ','.join(images_links),
             'price': price,
-            'info': real_estate_info,
+            'info': ','.join(real_estate_info),
             'coordinates': location,
             'description': description,
             'owner_link': saler_link
@@ -175,7 +175,6 @@ def main(query, location):
     scroll_to_the_end_of_page(driver)
     links = get_goods_links_from_page(driver)
     result = get_goods_data(links, driver)
-    print(result)
     return result
 
 if __name__ == '__main__':
