@@ -4,6 +4,10 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 debug = True
@@ -180,12 +184,15 @@ def get_saler_link(driver):
 
 
 def main(query, location):
+    firefox_driver_path = os.path.join(os.getcwd(), 'geckodriver')
+    ser = Service(executable_path=firefox_driver_path)
     options = webdriver.FirefoxOptions()
     options.set_preference('general.useragent.override','Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:94.0) Gecko/20100101 Firefox/94.0')
     options.set_preference('dom.webdriver.enabled', False)
     # if not debug:
-    options.headless = True
-    driver = webdriver.Firefox(options=options)
+    options.headless = False
+    # options.binary_location = FirefoxBinary(os.path.join(os.getcwd(), 'geckodriver'))
+    driver = webdriver.Firefox(service=ser, options=options)
     load_dotenv()
     url = f'https://www.facebook.com/marketplace/112306758786227/search/?daysSinceListed=1&query={query}&exact=false'
     if not debug:
