@@ -5,7 +5,10 @@ from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-from core.config import config, app_logger
+
+debug = True
+if not debug:
+    from core.config import config, app_logger
 
 
 headers = {
@@ -25,17 +28,17 @@ def wait_for_loading_element(xpath, driver, func, *func_args):
             # func(*func_args)
             break
 
-def search_location_setup(driver, location):
-    wait_for_loading_element('//div[@class="x1iyjqo2"]//ancestor::div[@role="button"]', driver, search_location_setup, driver, location)
-    print('here1')
-    driver.find_element(By.XPATH, '//div[@class="x1iyjqo2"]//ancestor::div[@role="button"]').click()
-    wait_for_loading_element('//input[@aria-label="Укажите город"]', driver, search_location_setup, driver, location)
-    print('here2')
-    driver.find_element(By.XPATH, '//input[@aria-label="Укажите город"]').send_keys(location)
-    wait_for_loading_element('//li[@class="xh8yej3" and @role="option"]', driver, search_location_setup, driver, location)
-    print('here3')
-    driver.find_elements(By.XPATH, '//div[@class="x1lq5wgf xgqcy7u x30kzoy x9jhf4c x1lliihq"]')[0].click()
-    driver.find_element(By.XPATH, '//div[@aria-label="Применить"]').click()
+# def search_location_setup(driver, location):
+#     wait_for_loading_element('//div[@class="x1iyjqo2"]//ancestor::div[@role="button"]', driver, search_location_setup, driver, location)
+#     print('here1')
+#     driver.find_element(By.XPATH, '//div[@class="x1iyjqo2"]//ancestor::div[@role="button"]').click()
+#     wait_for_loading_element('//input[@aria-label="Укажите город"]', driver, search_location_setup, driver, location)
+#     print('here2')
+#     driver.find_element(By.XPATH, '//input[@aria-label="Укажите город"]').send_keys(location)
+#     wait_for_loading_element('//li[@class="xh8yej3" and @role="option"]', driver, search_location_setup, driver, location)
+#     print('here3')
+#     driver.find_elements(By.XPATH, '//div[@class="x1lq5wgf xgqcy7u x30kzoy x9jhf4c x1lliihq"]')[0].click()
+#     driver.find_element(By.XPATH, '//div[@aria-label="Применить"]').click()
 
 
 
@@ -51,8 +54,12 @@ def scroll_to_the_end_of_page(driver):
 
 
 def login(driver, url):
-    username = config.USERNAME
-    password = config.PASSWORD
+    if not debug:
+        username = config.USERNAME
+        password = config.PASSWORD
+    else:
+        username = os.environ.get('USERNAME')
+        password = os.environ.get('PASSWORD')
 
     driver.get(url)
     if len(driver.find_elements(By.XPATH, '//button[text()="Allow essential and optional cookies"]')) > 0:
@@ -65,7 +72,7 @@ def login(driver, url):
 def get_goods_links_from_page(driver):
     
     all_goods_container = driver.find_element(
-        By.CSS_SELECTOR, '.x1xfsgkm > div:nth-child(1) > div:nth-child(2)')
+        By.XPATH, '//div[@class="x8gbvx8 x78zum5 x1q0g3np x1a02dak x1rdy4ex xcud41i x4vbgl9 x139jcc6 x1nhvcw1"]')
     goods_containers = all_goods_container.find_elements(By.XPATH, '*')
 
     # delete all empty elements
@@ -99,17 +106,28 @@ def get_goods_data(links, driver):
                 By.XPATH, '//div[@class="x14vqqas"]/preceding-sibling::span').text
         else:
             description = ''
+        description = description.replace('\r\n', ' ')
+        description = description.replace('\n', ' ')
+        description = description.replace('\\n', ' ')
+        description = description.replace(';', ' ')
+        description = description.replace(' Свернуть', ' ')
         saler_link = get_saler_link(driver)
         data.append({
             'item_link': link,
             'header': name,
-            'images': ','.join(images_links),
+            'images': ', '.join(images_links),
             'price': price,
-            'info': ','.join(real_estate_info),
-            'coordinates': location,
+            'info': ', '.join(real_estate_info),
+            'coordinates': ', '.join(location),
             'description': description,
             'owner_link': saler_link
         })
+        f = open('file.txt', 'w')
+        f.close()
+        f = open('file.txt', 'a')
+        f.write(str(data[-1]))
+        f.write('\n')
+        break
     return data
 
 
@@ -165,21 +183,31 @@ def main(query, location):
     options = webdriver.FirefoxOptions()
     options.set_preference('general.useragent.override','Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:94.0) Gecko/20100101 Firefox/94.0')
     options.set_preference('dom.webdriver.enabled', False)
+    # if not debug:
     options.headless = True
     driver = webdriver.Firefox(options=options)
     load_dotenv()
-    url = f'https://www.facebook.com/marketplace/112306758786227/search/?query={query}&exact=false'
-    app_logger.info("Start login")
+    url = f'https://www.facebook.com/marketplace/112306758786227/search/?daysSinceListed=1&query={query}&exact=false'
+    if not debug:
+        app_logger.info("Start login")
     login(driver, url)
-    app_logger.info("Logined successfully")
-    # search_location_setup(driver, location)
-    app_logger.info("Start scrolling")
+    if not debug:
+        app_logger.info("Logined successfully")
+        # search_location_setup(driver, location)
+        app_logger.info("Start scrolling")
     scroll_to_the_end_of_page(driver)
-    app_logger.info("Finish scrolling")
-    app_logger.info("Start getting links")
+    if not debug:
+        app_logger.info("Finish scrolling")
+        app_logger.info("Start getting links")
     links = get_goods_links_from_page(driver)
-    app_logger.info("Got links")
-    app_logger.info("Start getting data from links")
+    if not debug:
+        app_logger.info("Got links")
+        app_logger.info("Start getting data from links")
     result = get_goods_data(links, driver)
-    app_logger.info("Got data from links")
+    if not debug:
+        app_logger.info("Got data from links")
+
     return result
+
+if __name__ == '__main__':
+    main('rent%20apartment', 'паттайя')
