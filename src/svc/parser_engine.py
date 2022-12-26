@@ -8,11 +8,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.chrome import ChromeDriverManager
-
-
-debug = True
-if not debug:
-    from core.config import config, app_logger
+from core.config import config, app_logger
 
 
 headers = {
@@ -58,12 +54,8 @@ def scroll_to_the_end_of_page(driver):
 
 
 def login(driver, url):
-    if not debug:
-        username = config.USERNAME
-        password = config.PASSWORD
-    else:
-        username = os.environ.get('USERNAME')
-        password = os.environ.get('PASSWORD')
+    username = config.USERNAME
+    password = config.PASSWORD
 
     driver.get(url)
     if len(driver.find_elements(By.XPATH, '//button[text()="Allow essential and optional cookies"]')) > 0:
@@ -131,7 +123,7 @@ def get_goods_data(links, driver):
         f = open('file.txt', 'a')
         f.write(str(data[-1]))
         f.write('\n')
-        break
+
     return data
 
 
@@ -189,32 +181,32 @@ def main(query, location):
     options = webdriver.FirefoxOptions()
     options.set_preference('general.useragent.override','Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:94.0) Gecko/20100101 Firefox/94.0')
     options.set_preference('dom.webdriver.enabled', False)
-    # if not debug:
-    options.headless = False
+    options.headless = True
     # options.binary_location = FirefoxBinary(os.path.join(os.getcwd(), 'geckodriver'))
     driver = webdriver.Firefox(service=ser, options=options)
-    load_dotenv()
+    #load_dotenv()
+
     url = f'https://www.facebook.com/marketplace/112306758786227/search/?daysSinceListed=1&query={query}&exact=false'
-    if not debug:
-        app_logger.info("Start login")
+    
+    app_logger.info("Start login")
     login(driver, url)
-    if not debug:
-        app_logger.info("Logined successfully")
-        # search_location_setup(driver, location)
-        app_logger.info("Start scrolling")
+    app_logger.info("Logined successfully")
+
+    # search_location_setup(driver, location)
+
+    app_logger.info("Start scrolling")
     scroll_to_the_end_of_page(driver)
-    if not debug:
-        app_logger.info("Finish scrolling")
-        app_logger.info("Start getting links")
+    app_logger.info("Finish scrolling")
+
+    app_logger.info("Start getting links")
     links = get_goods_links_from_page(driver)
-    if not debug:
-        app_logger.info("Got links")
-        app_logger.info("Start getting data from links")
+    app_logger.info("Got links")
+
+    app_logger.info("Start getting data from links")
     result = get_goods_data(links, driver)
-    if not debug:
-        app_logger.info("Got data from links")
+    app_logger.info("Got data from links")
 
     return result
 
-if __name__ == '__main__':
-    main('rent%20apartment', 'паттайя')
+#if __name__ == '__main__':
+    #main('rent%20apartment', 'паттайя')

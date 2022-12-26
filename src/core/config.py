@@ -19,8 +19,8 @@ class Settings(BaseSettings):
     BOT_TOKEN: str = Field("token", env="BOT_TOKEN")
     REDIS_HOST: str = Field("redis", env="REDIS_HOST")
     REDIS_PORT: int = Field(6379, env="REDIS_PORT")
-    USERNAME: str = Field("username", env="USERNAME")
-    PASSWORD: str = Field("password", env="PASSWORD")
+    USERNAME: str = Field("username", env="FB_LOGIN")
+    PASSWORD: str = Field("password", env="FB_PASSWORD")
     PSQL_DATABASE_URI: Union[str, None] = None
 
     @validator("PSQL_DATABASE_URI", pre=True)
