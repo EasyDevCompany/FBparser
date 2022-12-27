@@ -7,7 +7,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 
-from core.config import config, app_logger
+debug = False
+if not debug:
+    from core.config import config, app_logger
 
 
 headers = {
@@ -53,12 +55,16 @@ def scroll_to_the_end_of_page(driver):
 
 
 def login(driver, url):
-    username = config.USERNAME
-    password = config.PASSWORD
+    if not debug:
+        username = config.USERNAME
+        password = config.PASSWORD
+    else:
+        username = os.environ.get('FB_LOGIN')
+        password = os.environ.get('FB_PASSWORD')
 
     driver.get(url)
-    if len(driver.find_elements(By.XPATH, '//button[text()="Allow essential and optional cookies"]')) > 0:
-        driver.find_element(By.XPATH, '//button[text()="Allow essential and optional cookies"]').click()
+    if len(driver.find_elements(By.XPATH, '//button[@data-cookiebanner="accept_button"]')) > 0:
+        driver.find_element(By.XPATH, '//button[@data-cookiebanner="accept_button"]').click()
     driver.find_element(By.XPATH, '//*[@id="email"]').send_keys(username)
     driver.find_element(By.XPATH, '//*[@id="pass"]').send_keys(password)
     driver.find_element(By.XPATH, '//*[@id="loginbutton"]').click()
@@ -83,6 +89,9 @@ def get_goods_links_from_page(driver):
 
 def get_goods_data(links, driver):
     data = []
+    print(f'{len(links)} - ссылок')
+    f = open('file.txt', 'w')
+    f.close()
     for link in links:
         driver.get(link)
         wait_for_loading_element('//div[@class="xyamay9 x1pi30zi x18d9i69 x1swvt13"]', driver, get_goods_data, links, driver)
@@ -117,8 +126,7 @@ def get_goods_data(links, driver):
             'description': description,
             'owner_link': saler_link
         })
-        f = open('file.txt', 'w')
-        f.close()
+        
         f = open('file.txt', 'a')
         f.write(str(data[-1]))
         f.write('\n')
@@ -206,5 +214,5 @@ def main(query, location):
 
     return result
 
-#if __name__ == '__main__':
-    #main('rent%20apartment', 'паттайя')
+if __name__ == '__main__':
+    main('rent%20apartment', 'паттайя')
