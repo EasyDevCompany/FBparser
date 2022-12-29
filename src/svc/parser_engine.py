@@ -17,7 +17,7 @@ headers = {
 }
 
 
-def wait_for_loading_element(xpath, driver, func, *func_args):
+def wait_for_loading_element(xpath, driver):
     now = datetime.now()
     while True:
         if len(driver.find_elements(By.XPATH, xpath)) > 0:
@@ -25,21 +25,8 @@ def wait_for_loading_element(xpath, driver, func, *func_args):
         if (datetime.now() - now) > timedelta(seconds=20):
             print(datetime.now(), now, 'refresh')
             now = datetime.now()
-            # driver.refresh()
-            # func(*func_args)
             break
 
-# def search_location_setup(driver, location):
-#     wait_for_loading_element('//div[@class="x1iyjqo2"]//ancestor::div[@role="button"]', driver, search_location_setup, driver, location)
-#     print('here1')
-#     driver.find_element(By.XPATH, '//div[@class="x1iyjqo2"]//ancestor::div[@role="button"]').click()
-#     wait_for_loading_element('//input[@aria-label="Укажите город"]', driver, search_location_setup, driver, location)
-#     print('here2')
-#     driver.find_element(By.XPATH, '//input[@aria-label="Укажите город"]').send_keys(location)
-#     wait_for_loading_element('//li[@class="xh8yej3" and @role="option"]', driver, search_location_setup, driver, location)
-#     print('here3')
-#     driver.find_elements(By.XPATH, '//div[@class="x1lq5wgf xgqcy7u x30kzoy x9jhf4c x1lliihq"]')[0].click()
-#     driver.find_element(By.XPATH, '//div[@aria-label="Применить"]').click()
 
 
 
@@ -61,6 +48,7 @@ def login(driver, url):
     else:
         username = os.environ.get('FB_LOGIN')
         password = os.environ.get('FB_PASSWORD')
+        print('here', username, password)
 
     driver.get(url)
     if len(driver.find_elements(By.XPATH, '//button[@data-cookiebanner="accept_button"]')) > 0:
@@ -94,7 +82,7 @@ def get_goods_data(links, driver):
     f.close()
     for link in links:
         driver.get(link)
-        wait_for_loading_element('//div[@class="xyamay9 x1pi30zi x18d9i69 x1swvt13"]', driver, get_goods_data, links, driver)
+        wait_for_loading_element('//div[@class="xyamay9 x1pi30zi x18d9i69 x1swvt13"]', driver)
         name_price_container = driver.find_element(By.XPATH, '//div[@class="xyamay9 x1pi30zi x18d9i69 x1swvt13"]')
         name = name_price_container.find_element(By.XPATH, '//h1/span').text
         images_links = get_all_goods_images_links(driver)
@@ -116,6 +104,9 @@ def get_goods_data(links, driver):
         description = description.replace(';', ' ')
         description = description.replace(' Свернуть', ' ')
         saler_link = get_saler_link(driver)
+        if price.find('Информация о продавце') != -1:
+            print(link)
+            break
         data.append({
             'item_link': link,
             'header': name,
@@ -139,7 +130,7 @@ def get_all_goods_images_links(driver):
     images_container = driver.find_elements(
         By.XPATH, '//div[@class="x1a0syf3 x1ja2u2z"]/div')
     if len(images_container) == 0:
-        wait_for_loading_element('//span[@class="x78zum5 x1vjfegm"]/descendant::img', driver, get_all_goods_images_links, driver)
+        wait_for_loading_element('//span[@class="x78zum5 x1vjfegm"]/descendant::img', driver)
         return [driver.find_element(By.XPATH, '//span[@class="x78zum5 x1vjfegm"]/descendant::img').get_attribute('src')]
     for image_container in images_container[0].find_elements(By.XPATH, '*'):
         images_links.append(image_container.find_element(By.TAG_NAME, 'img').get_attribute('src'))
@@ -182,37 +173,36 @@ def get_saler_link(driver):
             return link[0].get_attribute('href')
 
 
-def main(query, location):
+def main(query):
 
     options = webdriver.FirefoxOptions()
     options.set_preference('general.useragent.override','Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:94.0) Gecko/20100101 Firefox/94.0')
     options.set_preference('dom.webdriver.enabled', False)
     options.headless = True
-    # options.binary_location = FirefoxBinary(os.path.join(os.getcwd(), 'geckodriver'))
     driver = webdriver.Firefox(options=options)
-    #load_dotenv()
+    load_dotenv()
+    print('query in code -- ', query)
 
     url = f'https://www.facebook.com/marketplace/112306758786227/search/?daysSinceListed=1&query={query}&exact=false'
+    print('link : ', url)
     
-    app_logger.info("Start login")
+    # app_logger.info("Start login")
     login(driver, url)
-    app_logger.info("Logined successfully")
+    # app_logger.info("Logined successfully")
 
-    # search_location_setup(driver, location)
-
-    app_logger.info("Start scrolling")
+    # app_logger.info("Start scrolling")
     scroll_to_the_end_of_page(driver)
-    app_logger.info("Finish scrolling")
+    # app_logger.info("Finish scrolling")
 
-    app_logger.info("Start getting links")
+    # app_logger.info("Start getting links")
     links = get_goods_links_from_page(driver)
-    app_logger.info("Got links")
+    # app_logger.info("Got links")
 
-    app_logger.info("Start getting data from links")
+    # app_logger.info("Start getting data from links")
     result = get_goods_data(links, driver)
-    app_logger.info("Got data from links")
+    # app_logger.info("Got data from links")
 
     return result
 
 if __name__ == '__main__':
-    main('rent%20apartment', 'паттайя')
+    main('rent%20apartment')

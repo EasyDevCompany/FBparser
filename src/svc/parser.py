@@ -27,7 +27,7 @@ class TaskExecutor(ABC):
     def start_parsing(self) -> None:
         """Функция парсинга (пока фейковая)"""
         app_logger.info(f"{self.geo} --- {self.query}")
-        self.storage = parser_engine.main(query=self.geo, location=self.query)
+        self.storage = parser_engine.main(query=self.query)
         app_logger.info("Market was parsed")
         self.create_db_objects()
         return None
@@ -39,6 +39,7 @@ class TaskExecutor(ABC):
         count = 0
 
         for object in parsed_objects:
+            # print('price ', object.get("price"))  ALL IS OKAY
 
             item = MarketItem(
                 item_link=object.get("item_link"),
@@ -87,6 +88,7 @@ class TaskExecutor(ABC):
         result_list = []
 
         for item in market_items:
+            print('price ' + item.price)
             temp_dict = {
                 "item_link": item.item_link,
                 "header": item.header,

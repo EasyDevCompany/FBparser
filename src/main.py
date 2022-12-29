@@ -7,18 +7,15 @@ from aiogram.utils import executor
 from core.config import app_logger, bot, dp
 from db.db import init_db
 from svc.handlers.base_handler import register_handlers_start
-from svc.handlers.parsing_handler import register_handlers_change_query
 
 
 def on_startup(bot: Bot, loop):
     init_db()
 
-    register_handlers_change_query(dp)
     register_handlers_start(dp)
 
     commands = [
         BotCommand(command="/start", description="Начало парсинга"),
-        BotCommand(command="/change_query", description="Смена запроса для парсинга"),
     ]
 
     loop.run_until_complete(bot.set_my_commands(commands))
