@@ -88,7 +88,7 @@ class TaskExecutor(ABC):
         result_list = []
 
         for item in market_items:
-            print('price ' + item.price)
+            #print('price ' + item.price)
             temp_dict = {
                 "item_link": item.item_link,
                 "header": item.header,
@@ -120,7 +120,7 @@ class TaskExecutor(ABC):
 
         for item in market_items:
             response = requests.get(url=item.item_link)
-            if response.status_code != HTTPStatus.OK:
+            if response.status_code >= 300:
                 db_session.delete(item)
                 db_session.commit()
 
