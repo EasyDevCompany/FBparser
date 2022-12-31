@@ -121,6 +121,7 @@ def get_goods_data(links, driver):
         f = open('file.txt', 'a')
         f.write(str(data[-1]))
         f.write('\n')
+        time.sleep(10)
         
     return data
 
@@ -186,21 +187,29 @@ def main(query):
     url = f'https://www.facebook.com/marketplace/112306758786227/search/?daysSinceListed=1&query={query}&exact=false'
     print('link : ', url)
     
-    # app_logger.info("Start login")
+    if not debug:
+        app_logger.info("Start login")
     login(driver, url)
-    # app_logger.info("Logined successfully")
+    if not debug:
+        app_logger.info("Logined successfully")
 
-    # app_logger.info("Start scrolling")
+    if not debug:
+        app_logger.info("Start scrolling")
     scroll_to_the_end_of_page(driver)
-    # app_logger.info("Finish scrolling")
+    if not debug:
+        app_logger.info("Finish scrolling")
 
-    # app_logger.info("Start getting links")
+    if not debug:
+        app_logger.info("Start getting links")
     links = get_goods_links_from_page(driver)
-    # app_logger.info("Got links")
+    if not debug:
+        app_logger.info("Got links")
 
-    # app_logger.info("Start getting data from links")
+    if not debug:
+        app_logger.info("Start getting data from links")
     result = get_goods_data(links, driver)
-    # app_logger.info("Got data from links")
+    if not debug:
+        app_logger.info("Got data from links")
 
     return result
 

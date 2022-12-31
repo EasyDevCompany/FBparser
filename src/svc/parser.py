@@ -92,20 +92,20 @@ class TaskExecutor(ABC):
             temp_dict = {
                 "item_link": item.item_link,
                 "header": item.header,
-                "image": item.image,
                 "price": item.price,
                 "info": item.info,
                 "coordinates": item.coordinates,
                 "description": item.description,
                 "owner_link": item.owner_link,
+                "image": item.image
             }
             result_list.append(temp_dict)
 
         return result_list
 
     def create_file(self, file_name, list_to_write) -> None:
-        """Создание результирующего yaml файла"""
-        with open(file_name, "w", encoding="utf-8", newline="") as outfile:
+        """Создание результирующего csv файла"""
+        with open(file_name, "w", encoding="utf-8", newline=" ") as outfile:
             keys = list_to_write[0].keys()
             dict_writer = csv.DictWriter(outfile, keys, delimiter=";")
             dict_writer.writeheader()
