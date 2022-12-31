@@ -88,12 +88,11 @@ class TaskExecutor(ABC):
         result_list = []
 
         for item in market_items:
-            #print('price ' + item.price)
             temp_dict = {
                 "item_link": item.item_link,
                 "header": item.header,
                 "price": item.price,
-                "info": item.info,
+                "info": item.info if item.info else item.header,
                 "coordinates": item.coordinates,
                 "description": item.description,
                 "owner_link": item.owner_link,
