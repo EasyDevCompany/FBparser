@@ -105,7 +105,7 @@ class TaskExecutor(ABC):
 
     def create_file(self, file_name, list_to_write) -> None:
         """Создание результирующего csv файла"""
-        with open(file_name, "w", encoding="utf-8", newline=" ") as outfile:
+        with open(file_name, "w", encoding="utf-8", newline="") as outfile:
             keys = list_to_write[0].keys()
             dict_writer = csv.DictWriter(outfile, keys, delimiter=";")
             dict_writer.writeheader()
