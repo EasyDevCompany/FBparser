@@ -90,7 +90,7 @@ class TaskExecutor(ABC):
         for item in market_items:
             temp_dict = {
                 "item_link": item.item_link,
-                "header": item.header,
+                "header": item.header if item.header else item.info,
                 "price": item.price,
                 "info": item.info if item.info else item.header,
                 "coordinates": item.coordinates,
