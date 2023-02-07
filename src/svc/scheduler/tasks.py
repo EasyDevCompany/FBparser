@@ -6,7 +6,7 @@ from core.config import app_logger
 from svc.parser import TaskExecutor
 
 
-@celery.task()
+@celery.task(acks_late=True)
 def start_parsing() -> str:
     app_logger.info("Start parsing")
 

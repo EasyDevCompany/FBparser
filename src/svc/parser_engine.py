@@ -121,7 +121,6 @@ def get_goods_data(links, driver):
         f = open('file.txt', 'a')
         f.write(str(data[-1]))
         f.write('\n')
-        time.sleep(10)
         
     return data
 
