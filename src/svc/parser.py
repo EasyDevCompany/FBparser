@@ -13,24 +13,37 @@ import requests
 from core.config import app_logger, bot
 from db.db import db_session
 from db.db_models import MarketItem
-from svc import parser_engine
+from svc.parser_engine import Parser
+
+
+parser = Parser()
+
+
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
 
 
 class TaskExecutor(ABC):
     def __init__(self, geo: str, query: str, chat_id: int) -> None:
         self.geo = geo
         self.query = query.replace(" ", "%20")
+        self.url = f'https://www.facebook.com/marketplace/112306758786227/search/?daysSinceListed=1&query={self.query}&exact=false'
         self.chat_id = chat_id
         self.storage: List[Dict] = []
+        self.all_links: List[str] = []
         self.date_today = dt.now().date()
 
-    def start_parsing(self) -> None:
+    def start_parsing(self) -> List[List[str]]:
         """Функция парсинга (пока фейковая)"""
         app_logger.info(f"{self.geo} --- {self.query}")
-        self.storage = parser_engine.Parser().main(query=self.query)
-        app_logger.info("Market was parsed")
-        self.create_db_objects()
-        return None
+        self.all_links = parser.scroll_to_the_end_of_page(self.url)
+
+        div_links = list(chunks(self.all_links, 10))
+
+        app_logger.info("Market scrolled, got links")
+        return div_links
 
     def create_db_objects(self) -> None:
         """Создание объектов класса Marketitem из данных парсинга"""

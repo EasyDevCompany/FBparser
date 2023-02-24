@@ -26,8 +26,9 @@ class Parser():
         self.driver = webdriver.Firefox(options=options)
         load_dotenv()
 
-    def scroll_to_the_end_of_page(self, driver, url):
+    def scroll_to_the_end_of_page(self, url):
         app_logger.info("Start login")
+        driver = self.driver
         self.login(url)
         app_logger.info("Logined successfully")
         while True:
@@ -82,8 +83,6 @@ class Parser():
             f = open('file.txt', 'a')
             f.write(str(data[-1]))
             f.write('\n')
-            break
-            time.sleep(10)
 
         return data
 
