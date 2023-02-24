@@ -16,6 +16,7 @@ ALL_LINKS = []
 
 @celery.task(bind=True, autoretry_for=(Exception,), default_retry_delay=30, max_retries=3)
 def parsing_part(self, try_num):
+    try_num = int(try_num)
     try:
             global OVERALL_RESULT
             global ALL_LINKS

@@ -26,17 +26,17 @@ celery.conf.beat_schedule = {
     "part_parsing_1": {
         "task": "svc.scheduler.tasks.parsing_part",
         "schedule": crontab(hour="9", minute="15"),
-        'args': (1),
+        "args": ("1"),
     },
     "part_parsing_2": {
         "task": "svc.scheduler.tasks.parsing_part",
         "schedule": crontab(hour="9", minute="45"),
-        'args': (2),
+        "args": ("2"),
     },
     "part_parsing_3": {
         "task": "svc.scheduler.tasks.parsing_part",
         "schedule": crontab(hour="10", minute="15"),
-        'args': (3),
+        "args": ("3"),
     },
     "delete_non_existing_items_links": {
         "task": "svc.scheduler.tasks.delete_links",
