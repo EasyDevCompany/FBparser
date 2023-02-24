@@ -11,27 +11,86 @@ import time
 
 
 OVERALL_RESULT = []
+ALL_LINKS = []
 
 
 @celery.task(bind=True, autoretry_for=(Exception,), default_retry_delay=30, max_retries=3)
-def parsing_part(self, links):
-    global OVERALL_RESULT
+def parsing_part(self, try_num):
     try:
-        result = parser.get_goods_data(links)
-        OVERALL_RESULT += result
-        return result
+            global OVERALL_RESULT
+            global ALL_LINKS
+
+            app_logger.info(f"Start part parsing number {try_num}")
+
+            file_name = "svc/handlers/geo_query.json"
+            file = Path(file_name)
+
+            if file.exists():
+
+                with open(file_name, "r", encoding="utf-8") as json_file:
+                    data = json_file.read()
+
+                if data:
+                    json_data = json.loads(data)
+
+                    if try_num == 1:
+                        if len(ALL_LINKS) > 1:
+                            parsed_data = parser.get_goods_data(ALL_LINKS[0])
+                            OVERALL_RESULT += parsed_data
+                            app_logger.info("Added 1st group")
+                        elif len(ALL_LINKS) == 1:
+                            parsed_data = parser.get_goods_data(ALL_LINKS[0])
+                            OVERALL_RESULT += parsed_data
+                            app_logger.info("Added 1st group and prepare file")
+                            fb_parser = TaskExecutor(json_data["Геопозиция"], json_data["Запрос"], json_data["chat_id"])
+                            fb_parser.storage = OVERALL_RESULT
+                            fb_parser.create_db_objects()
+                        else:
+                            app_logger.info("Nothing to parse")
+                    elif try_num == 2:
+                        if len(ALL_LINKS) > 2:
+                            parsed_data = parser.get_goods_data(ALL_LINKS[1])
+                            OVERALL_RESULT += parsed_data
+                            app_logger.info("Added 2nd group")
+                        elif len(ALL_LINKS) == 2:
+                            parsed_data = parser.get_goods_data(ALL_LINKS[1])
+                            OVERALL_RESULT += parsed_data
+                            app_logger.info("Added 2nd group and prepare file")
+                            fb_parser = TaskExecutor(json_data["Геопозиция"], json_data["Запрос"], json_data["chat_id"])
+                            fb_parser.storage = OVERALL_RESULT
+                            fb_parser.create_db_objects()
+                        else:
+                            app_logger.info("Nothing to parse")
+                    elif try_num == 3:
+                        if len(ALL_LINKS) == 3:
+                            parsed_data = parser.get_goods_data(ALL_LINKS[2])
+                            OVERALL_RESULT += parsed_data
+                            app_logger.info("Added 3d group and prepare file")
+                            fb_parser = TaskExecutor(json_data["Геопозиция"], json_data["Запрос"], json_data["chat_id"])
+                            fb_parser.storage = OVERALL_RESULT
+                            fb_parser.create_db_objects()
+                        else:
+                            app_logger.info("Nothing to parse")
+                    return "Done parsing"
+
+                else:
+                    app_logger.info("No query and geo data to start parsing, file is empty")
+                    return "No input data to parse, file is empty"
+
+            else:
+                app_logger.info("No query and geo data to start parsing, file does not exist")
+                return "No input data to parse, file does not exist"
     except Exception as exc:
         print(exc)
         if self.request.retries >= self.max_retries:
-            result = []
             print('Run out of tries :(')
-            return result
         self.retry(exc=exc)
 
 
 @celery.task()
 def start_parsing() -> str:
     global OVERALL_RESULT
+    global ALL_LINKS
 
     app_logger.info("Start parsing")
 
@@ -48,22 +107,12 @@ def start_parsing() -> str:
 
             fb_parser = TaskExecutor(json_data["Геопозиция"], json_data["Запрос"], json_data["chat_id"])
 
-            links = fb_parser.start_parsing()
-            parsed_data = parser.get_goods_data(links)
-            fb_parser.storage = parsed_data
-            #div_links = fb_parser.start_parsing()
-            #group_chain = chain(parsing_part.si(links) for links in div_links)()
+            div_links = fb_parser.start_parsing()
 
-            #group_result = group_chain.get()
+            ALL_LINKS = div_links
 
-            #fb_parser.storage = OVERALL_RESULT
-
-            app_logger.info("Marked was parsed")
-            
-            fb_parser.create_db_objects()
-
-            app_logger.info("Finish parsing")
-            return "Done parsing"
+            app_logger.info("Finish scrolling")
+            return "Finish scrolling"
 
         else:
             app_logger.info("No query and geo data to start parsing, file is empty")
