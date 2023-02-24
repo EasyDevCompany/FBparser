@@ -1,5 +1,6 @@
 from celery import Celery
 from celery.schedules import crontab
+from celery.app import trace
 
 from core.config import config
 
@@ -12,6 +13,10 @@ celery = Celery(
     backend=f'redis://{config.REDIS_HOST}:{config.REDIS_PORT}',
     include=["svc.scheduler.tasks"],
 )
+
+trace.LOG_SUCCESS = """\
+    Task %(name)s[%(id)s] succeeded in %(runtime)ss\
+    """
 
 celery.conf.beat_schedule = {
     "start_parsing": {

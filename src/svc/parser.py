@@ -41,8 +41,9 @@ class TaskExecutor(ABC):
         self.all_links = parser.scroll_to_the_end_of_page(self.url)
 
         div_links = list(chunks(self.all_links, 10))
+        
 
-        app_logger.info("Market scrolled, got links")
+        app_logger.info(f"Market scrolled, got links: {len(div_links)}")
         return div_links
 
     def create_db_objects(self) -> None:
