@@ -7,4 +7,4 @@ RUN apt-get install -y --no-install-recommends firefox
 COPY requirements.txt requirements.txt 
 RUN pip install -r requirements.txt 
 COPY . . 
-CMD celery -A celery_conf worker -l INFO -P eventlet -c 2
+CMD celery -A celery_conf worker -l INFO -P eventlet

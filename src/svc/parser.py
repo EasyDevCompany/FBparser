@@ -35,16 +35,16 @@ class TaskExecutor(ABC):
         self.all_links: List[str] = []
         self.date_today = dt.now().date()
 
-    def start_parsing(self) -> List[List[str]]:
+    def start_parsing(self) -> List[str]:
         """Функция парсинга (пока фейковая)"""
         app_logger.info(f"{self.geo} --- {self.query}")
         self.all_links = parser.scroll_to_the_end_of_page(self.url)
 
-        div_links = list(chunks(self.all_links, 20))
+        #div_links = list(chunks(self.all_links, 20))
         
 
         app_logger.info(f"Market scrolled, got links: {len(self.all_links)}")
-        return div_links
+        return self.all_links
 
     def create_db_objects(self) -> None:
         """Создание объектов класса Marketitem из данных парсинга"""

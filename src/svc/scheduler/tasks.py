@@ -48,12 +48,15 @@ def start_parsing() -> str:
 
             fb_parser = TaskExecutor(json_data["Геопозиция"], json_data["Запрос"], json_data["chat_id"])
 
-            div_links = fb_parser.start_parsing()
-            group_chain = chain(parsing_part.si(links) for links in div_links)()
+            links = fb_parser.start_parsing()
+            parsed_data = parser.get_goods_data(links)
+            fb_parser.storage = parsed_data
+            #div_links = fb_parser.start_parsing()
+            #group_chain = chain(parsing_part.si(links) for links in div_links)()
 
-            group_result = group_chain.get()
+            #group_result = group_chain.get()
 
-            fb_parser.storage = OVERALL_RESULT
+            #fb_parser.storage = OVERALL_RESULT
 
             app_logger.info("Marked was parsed")
             
