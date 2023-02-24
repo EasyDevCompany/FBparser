@@ -5,6 +5,7 @@ pydantic[dotenv]==1.9.1
 aiogram==2.23.1
 aioredis==2.0.1
 celery==5.2.7
+eventlet==0.33.3
 redis==4.5.1
 aiofiles==22.1.0
 async-generator==1.10
