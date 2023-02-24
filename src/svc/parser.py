@@ -43,7 +43,7 @@ class TaskExecutor(ABC):
         div_links = list(chunks(self.all_links, 10))
         
 
-        app_logger.info(f"Market scrolled, got links: {len(div_links)}")
+        app_logger.info(f"Market scrolled, got links: {len(self.all_links)}")
         return div_links
 
     def create_db_objects(self) -> None:

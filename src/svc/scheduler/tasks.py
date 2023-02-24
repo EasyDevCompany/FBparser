@@ -43,10 +43,18 @@ def start_parsing() -> str:
             div_links = fb_parser.start_parsing()
             group_result = group(parsing_part.s(links) for links in div_links)()
 
-            if group_result.ready():
+            while group_result.waiting():
+                pass
+
+            if group_result.successful():
+                print('successful')
                 group_result = group_result.get()
+            else:
+                print('unsuccessful')
 
             app_logger.info("Marked was parsed")
+
+            print(group_result[0])
 
             for result in group_result:
                 fb_parser.storage += result
