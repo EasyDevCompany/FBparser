@@ -7,6 +7,7 @@ from celery_conf import celery
 from core.config import app_logger
 from svc.parser import TaskExecutor
 from svc.parser import parser
+import time
 
 
 @celery.task(bind=True, autoretry_for=(Exception,), default_retry_delay=30, max_retries=3)
@@ -44,7 +45,9 @@ def start_parsing() -> str:
             group_result = group(parsing_part.s(links) for links in div_links)()
 
             while group_result.waiting():
-                pass
+                print('Ждем')
+                time.sleep(60)
+                
 
             if group_result.successful():
                 print('successful')
