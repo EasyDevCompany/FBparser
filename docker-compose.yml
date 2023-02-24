@@ -34,6 +34,8 @@ services:
   rabbit:
       restart: always
       image: "rabbitmq:3-management"
+      volumes:
+        - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
       env_file:
         - ./src/.env
       ports:

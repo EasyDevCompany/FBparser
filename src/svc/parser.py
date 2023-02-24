@@ -40,7 +40,7 @@ class TaskExecutor(ABC):
         app_logger.info(f"{self.geo} --- {self.query}")
         self.all_links = parser.scroll_to_the_end_of_page(self.url)
 
-        div_links = list(chunks(self.all_links, 10))
+        div_links = list(chunks(self.all_links, 20))
         
 
         app_logger.info(f"Market scrolled, got links: {len(self.all_links)}")

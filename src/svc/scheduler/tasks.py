@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from celery import group
+from celery import chain
 
 from celery_conf import celery
 from core.config import app_logger
@@ -10,10 +10,15 @@ from svc.parser import parser
 import time
 
 
+OVERALL_RESULT = []
+
+
 @celery.task(bind=True, autoretry_for=(Exception,), default_retry_delay=30, max_retries=3)
 def parsing_part(self, links):
+    global OVERALL_RESULT
     try:
         result = parser.get_goods_data(links)
+        OVERALL_RESULT += result
         return result
     except Exception as exc:
         print(exc)
@@ -26,6 +31,8 @@ def parsing_part(self, links):
 
 @celery.task()
 def start_parsing() -> str:
+    global OVERALL_RESULT
+
     app_logger.info("Start parsing")
 
     file_name = "svc/handlers/geo_query.json"
@@ -42,25 +49,13 @@ def start_parsing() -> str:
             fb_parser = TaskExecutor(json_data["Геопозиция"], json_data["Запрос"], json_data["chat_id"])
 
             div_links = fb_parser.start_parsing()
-            group_result = group(parsing_part.s(links) for links in div_links)()
+            group_chain = chain(parsing_part.si(links) for links in div_links)()
 
-            while group_result.waiting():
-                print('Ждем')
-                time.sleep(60)
-                
+            group_result = group_chain.get()
 
-            if group_result.successful():
-                print('successful')
-                group_result = group_result.get()
-            else:
-                print('unsuccessful')
+            fb_parser.storage = OVERALL_RESULT
 
             app_logger.info("Marked was parsed")
-
-            print(group_result[0])
-
-            for result in group_result:
-                fb_parser.storage += result
             
             fb_parser.create_db_objects()
 
