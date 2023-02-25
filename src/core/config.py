@@ -31,7 +31,7 @@ class Settings(BaseSettings):
             password=values.get("DB_PASSWORD"),
             host=values.get("DB_HOST"),
             port=str(values.get("DB_PORT")),
-            path=f"/{values.get('POSTGRES_DB')}",
+            path=f"/{values.get('DB_NAME')}",
         )
 
     class Config:
