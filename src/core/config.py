@@ -7,7 +7,7 @@ from pydantic import BaseSettings, Field, PostgresDsn, validator
 
 
 class Settings(BaseSettings):
-    DB_NAME: str = Field("postgres", env="DB_NAME")
+    DB_NAME: str = Field("postgres", env="POSTGRES_DB")
     DB_USER: str = Field("postgres", env="POSTGRES_USER")
     DB_PASSWORD: str = Field("pass", env="POSTGRES_PASSWORD")
     DB_HOST: str = Field("localhost", env="DB_HOST")
@@ -31,7 +31,7 @@ class Settings(BaseSettings):
             password=values.get("DB_PASSWORD"),
             host=values.get("DB_HOST"),
             port=str(values.get("DB_PORT")),
-            path=f"/{values.get('DB_NAME')}",
+            path=f"/{values.get('POSTGRES_DB')}",
         )
 
     class Config:
