@@ -57,6 +57,10 @@ class Parser():
             print('here', username, password)
 
         self.driver.get(url)
+
+        self.driver.save_screenshot("screenshot.png")
+        asyncio.run(bot.send_photo(chat_id="477659907", photo=open("screenshot.png", "rb")))
+
         if len(self.driver.find_elements(By.XPATH, '//button[@data-cookiebanner="accept_button"]')) > 0:
             self.driver.find_element(By.XPATH, '//button[@data-cookiebanner="accept_button"]').click()
         self.driver.find_element(By.XPATH, '//*[@id="email"]').send_keys(username)
