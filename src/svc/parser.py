@@ -38,16 +38,25 @@ class TaskExecutor(ABC):
     def start_parsing(self) -> List[List[str]]:
         """Функция парсинга (пока фейковая)"""
         app_logger.info(f"{self.geo} --- {self.query}")
-        self.all_links = parser.scroll_to_the_end_of_page(self.url)
+        temp_links = parser.scroll_to_the_end_of_page(self.url)
+        temp_length = len(temp_links)
+
+        for link in temp_links:
+            exists = bool(MarketItem.query.filter_by(item_link=link).first())
+
+            if not exists:
+                self.all_links.append(link)
 
         length = len(self.all_links)
 
-        div_number = int(length / 3) + 1
-
-        div_links = list(chunks(self.all_links, div_number))
+        if length >= 30:
+            div_number = int(length / 3) + 1
+            div_links = list(chunks(self.all_links, div_number))
+        else:
+            div_links = [self.all_links]
         
 
-        app_logger.info(f"Market scrolled, got links: {length}")
+        app_logger.info(f"Market scrolled, got unique links: {length} / {temp_length}")
         return div_links
 
     def create_db_objects(self) -> None:
@@ -94,11 +103,11 @@ class TaskExecutor(ABC):
             self.create_file(file_name, formatted_list_of_db_objects)
 
             app_logger.info("New data was successfully written to file")
-            self.send_file_or_message(True, file_name, text="Новых объявлений нет, поищем завтра!")
+            self.send_file_or_message(True, file_name)
 
         else:
             app_logger.info("No new data to write")
-            self.send_file_or_message(False, "")
+            self.send_file_or_message(False, "", text="Новых объявлений нет, поищем завтра!")
         return None
 
     def prepare_list_of_objects(self, market_items: list) -> list:

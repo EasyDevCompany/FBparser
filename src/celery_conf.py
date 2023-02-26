@@ -40,7 +40,7 @@ celery.conf.beat_schedule = {
     },
     "delete_non_existing_items_links": {
         "task": "svc.scheduler.tasks.delete_links",
-        "schedule": crontab(hour="21"),
+        "schedule": crontab(hour="21", minute="00"),
     },
 }
 

@@ -12,6 +12,7 @@ import time
 
 OVERALL_RESULT = []
 ALL_LINKS = []
+SUCCESS = None
 
 
 @celery.task(bind=True, autoretry_for=(Exception,), default_retry_delay=30, max_retries=3)
@@ -20,6 +21,7 @@ def parsing_part(self, try_num):
     try:
         global OVERALL_RESULT
         global ALL_LINKS
+        global SUCCESS
 
         length = len(ALL_LINKS)
 
@@ -50,8 +52,10 @@ def parsing_part(self, try_num):
                         fb_parser.create_db_objects()
                         OVERALL_RESULT = []
                         ALL_LINKS = []
+                        SUCCESS = True
                     else:
                         app_logger.info("Nothing to parse")
+                        SUCCESS = False
                 elif try_num == 2:
                     if length > 2:
                         parsed_data = parser.get_goods_data(ALL_LINKS[1])
@@ -66,8 +70,10 @@ def parsing_part(self, try_num):
                         fb_parser.create_db_objects()
                         OVERALL_RESULT = []
                         ALL_LINKS = []
+                        SUCCESS = True
                     else:
                         app_logger.info("Nothing to parse")
+                        SUCCESS = False
                 elif try_num == 3:
                     if length == 3:
                         parsed_data = parser.get_goods_data(ALL_LINKS[2])
@@ -78,8 +84,14 @@ def parsing_part(self, try_num):
                         fb_parser.create_db_objects()
                         OVERALL_RESULT = []
                         ALL_LINKS = []
+                        SUCCESS = None
                     else:
                         app_logger.info("Nothing to parse")
+                        if not SUCCESS:
+                            fb_parser = TaskExecutor(json_data["Геопозиция"], json_data["Запрос"], json_data["chat_id"])
+                            fb_parser.send_file_or_message(False, "", text="Новых объявлений нет, поищем завтра!")
+                        SUCCESS = None
+
                 return "Done parsing"
 
             else:
@@ -96,8 +108,8 @@ def parsing_part(self, try_num):
         self.retry(exc=exc)
 
 
-@celery.task()
-def start_parsing() -> str:
+@celery.task(bind=True, autoretry_for=(Exception,), default_retry_delay=30, max_retries=3)
+def start_parsing(self):
     global OVERALL_RESULT
     global ALL_LINKS
 
@@ -106,30 +118,38 @@ def start_parsing() -> str:
     file_name = "svc/handlers/geo_query.json"
     file = Path(file_name)
 
-    if file.exists():
+    try:
 
-        with open(file_name, "r", encoding="utf-8") as json_file:
-            data = json_file.read()
+        if file.exists():
 
-        if data:
-            json_data = json.loads(data)
+            with open(file_name, "r", encoding="utf-8") as json_file:
+                data = json_file.read()
 
-            fb_parser = TaskExecutor(json_data["Геопозиция"], json_data["Запрос"], json_data["chat_id"])
+            if data:
+                json_data = json.loads(data)
 
-            div_links = fb_parser.start_parsing()
+                fb_parser = TaskExecutor(json_data["Геопозиция"], json_data["Запрос"], json_data["chat_id"])
 
-            ALL_LINKS = div_links
+                div_links = fb_parser.start_parsing()
 
-            app_logger.info("Finish scrolling")
-            return "Finish scrolling"
+                ALL_LINKS = div_links
+
+                app_logger.info("Finish scrolling")
+                return "Finish scrolling"
+
+            else:
+                app_logger.info("No query and geo data to start parsing, file is empty")
+                return "No input data to parse, file is empty"
 
         else:
-            app_logger.info("No query and geo data to start parsing, file is empty")
-            return "No input data to parse, file is empty"
-
-    else:
-        app_logger.info("No query and geo data to start parsing, file does not exist")
-        return "No input data to parse, file does not exist"
+            app_logger.info("No query and geo data to start parsing, file does not exist")
+            return "No input data to parse, file does not exist"
+        
+    except Exception as exc:
+        print(exc)
+        if self.request.retries >= self.max_retries:
+            print('Run out of tries :(')
+        self.retry(exc=exc)
 
 
 @celery.task()
