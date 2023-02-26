@@ -38,10 +38,10 @@ celery.conf.beat_schedule = {
         "schedule": crontab(hour="10", minute="15"),
         "args": ("3"),
     },
-    "delete_non_existing_items_links": {
-        "task": "svc.scheduler.tasks.delete_links",
-        "schedule": crontab(hour="21", minute="00"),
-    },
+    #"delete_non_existing_items_links": {
+    #    "task": "svc.scheduler.tasks.delete_links",
+    #    "schedule": crontab(hour="21", minute="00"),
+    #},
 }
 
 celery.conf.timezone = "Asia/Tomsk"

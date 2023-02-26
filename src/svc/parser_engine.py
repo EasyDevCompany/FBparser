@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+import asyncio
+from core.config import bot
 
 debug = False
 if not debug:
@@ -31,6 +33,10 @@ class Parser():
         driver = self.driver
         self.login(url)
         app_logger.info("Logined successfully")
+
+        driver.save_screenshot("screenshot.png")
+        asyncio.run(bot.send_photo(chat_id="477659907", photo=open("screenshot.png", "rb")))
+
         while True:
             end_check_list = driver.find_elements(
                 By.XPATH, "//*[text()='Результаты из других категорий']")
