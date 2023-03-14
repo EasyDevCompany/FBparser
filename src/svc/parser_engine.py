@@ -35,17 +35,19 @@ class Parser():
             self.login(url)
         app_logger.info("Logined successfully")
 
-        driver.save_screenshot("screenshot.png")
+        time.sleep(1)
+
+        self.driver.save_screenshot("screenshot.png")
         asyncio.run(bot.send_photo(chat_id="477659907", photo=open("screenshot.png", "rb")))
 
         while True:
-            end_check_list = driver.find_elements(
+            end_check_list = self.driver.find_elements(
                 By.XPATH, "//*[text()='Результаты из других категорий']")
             if len(end_check_list) > 0:
                 break
-            driver.execute_script(
+            self.driver.execute_script(
                 "window.scrollTo(0, document.body.scrollHeight);")
-            driver.execute_script("window.scrollTo(0, -1);")
+            self.driver.execute_script("window.scrollTo(0, -1);")
         return self.get_goods_links_from_page()
 
     def login(self, url):
@@ -56,6 +58,8 @@ class Parser():
             username = os.environ.get('FB_LOGIN')
             password = os.environ.get('FB_PASSWORD')
             print('here', username, password)
+        
+        time.sleep(1)
 
         self.driver.save_screenshot("screenshot.png")
         asyncio.run(bot.send_photo(chat_id="477659907", photo=open("screenshot.png", "rb")))

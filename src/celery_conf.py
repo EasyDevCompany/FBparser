@@ -21,11 +21,7 @@ trace.LOG_SUCCESS = """\
 celery.conf.beat_schedule = {
     "start_parsing": {
         "task": "svc.scheduler.tasks.start_parsing",
-<<<<<<< HEAD
-        "schedule": crontab(hour="18", minute="02"),
-=======
         "schedule": crontab(hour="9", minute="00"),
->>>>>>> 451ee06f032e145ee8defe617f6e44b9bb569133
     },
     "part_parsing_1": {
         "task": "svc.scheduler.tasks.parsing_part",
