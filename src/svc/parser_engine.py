@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+import asyncio
+from core.config import bot
 
 debug = False
 if not debug:
@@ -26,12 +28,16 @@ class Parser():
         self.driver = webdriver.Firefox(options=options)
         load_dotenv()
 
-    def scroll_to_the_end_of_page(self, driver, url):
+    def scroll_to_the_end_of_page(self, url):
         app_logger.info("Start login")
         self.driver.get(url)
         if len(self.driver.find_elements(By.XPATH, '//*[@id="loginbutton"]')):
             self.login(url)
         app_logger.info("Logined successfully")
+
+        driver.save_screenshot("screenshot.png")
+        asyncio.run(bot.send_photo(chat_id="477659907", photo=open("screenshot.png", "rb")))
+
         while True:
             end_check_list = driver.find_elements(
                 By.XPATH, "//*[text()='Результаты из других категорий']")
@@ -51,7 +57,9 @@ class Parser():
             password = os.environ.get('FB_PASSWORD')
             print('here', username, password)
 
-        
+        self.driver.save_screenshot("screenshot.png")
+        asyncio.run(bot.send_photo(chat_id="477659907", photo=open("screenshot.png", "rb")))
+
         if len(self.driver.find_elements(By.XPATH, '//button[@data-cookiebanner="accept_button"]')) > 0:
             self.driver.find_element(By.XPATH, '//button[@data-cookiebanner="accept_button"]').click()
         self.driver.find_element(By.XPATH, '//*[@id="email"]').send_keys(username)
