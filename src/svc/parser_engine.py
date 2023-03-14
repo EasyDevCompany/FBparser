@@ -28,7 +28,9 @@ class Parser():
 
     def scroll_to_the_end_of_page(self, driver, url):
         app_logger.info("Start login")
-        self.login(url)
+        self.driver.get(url)
+        if len(self.driver.find_elements(By.XPATH, '//*[@id="loginbutton"]')):
+            self.login(url)
         app_logger.info("Logined successfully")
         while True:
             end_check_list = driver.find_elements(
@@ -49,7 +51,7 @@ class Parser():
             password = os.environ.get('FB_PASSWORD')
             print('here', username, password)
 
-        self.driver.get(url)
+        
         if len(self.driver.find_elements(By.XPATH, '//button[@data-cookiebanner="accept_button"]')) > 0:
             self.driver.find_element(By.XPATH, '//button[@data-cookiebanner="accept_button"]').click()
         self.driver.find_element(By.XPATH, '//*[@id="email"]').send_keys(username)
@@ -82,7 +84,6 @@ class Parser():
             f = open('file.txt', 'a')
             f.write(str(data[-1]))
             f.write('\n')
-            break
             time.sleep(10)
 
         return data
@@ -192,5 +193,5 @@ class Parser():
         return result
 
 
-# if __name__ == '__main__':
-#     main('rent%20apartment')
+if __name__ == '__main__':
+    Parser().main('rent%20apartment')
