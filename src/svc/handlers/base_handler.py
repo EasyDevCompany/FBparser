@@ -36,7 +36,7 @@ async def query_input_start(message: types.Message, state: FSMContext) -> None:
     )
     await state.finish()
 
-    reply_dict["chat_id"] = message.chat.id
+    reply_dict["chat_id"] = 327428766 # message.chat.id
 
     path_to_file = Path(__file__).parent
 
